@@ -11,6 +11,11 @@ const App = () => {
       <Link to="/led" className="cursor-pointer border-2 p-4  mx-2 rounded-2xl">
         LED DigiClock
       </Link>
+      <Link
+        to="/analog"
+        className="cursor-pointer border-2 p-4  mx-2 rounded-2xl">
+        Analog Clock
+      </Link>
     </div>
   );
 };
