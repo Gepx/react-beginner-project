@@ -1,10 +1,13 @@
-import { signInWithPopup } from "firebase/auth";
+import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { useState } from "react";
 import { auth, googleProvider } from "../firebase";
 import toast from "react-hot-toast";
 
 const Login = () => {
   const [togglePassword, setTogglePassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [doc, setDoc] = useState(null);
 
   const handleGoogleLogin = async () => {
     try {
@@ -18,9 +21,31 @@ const Login = () => {
     }
   };
 
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+
+      // await setDoc(doc(db, "users", user.uid), {
+      //   email: user.email,
+      //   date: new Date(),
+      // });
+      toast.success("Login successful");
+      console.log("User logged in: ", user);
+    } catch (error) {
+      toast.error("Login failed: " + error.message);
+      console.error("Login failed:", error);
+    }
+  };
+
   return (
     <>
-      <form className="flex flex-col ubuntu-font">
+      <form className="flex flex-col ubuntu-font" onSubmit={handleLogin}>
         <div className="flex flex-col mb-4 ">
           <label htmlFor="email" className="text-sm font-bold mb-1 ">
             Email Address
@@ -29,6 +54,8 @@ const Login = () => {
             type="email"
             name="email"
             id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter your email address..."
             className="bg-white border-2 border-gray-300 rounded-md p-2 text-xs focus:outline-none focus:border-blue-500  focus:ring-blue-500"
             autoComplete="email"
@@ -43,6 +70,9 @@ const Login = () => {
           <input
             type={togglePassword ? "text" : "password"}
             id="password"
+            name="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             placeholder="Enter your password..."
             className="bg-white border-2 border-gray-300 rounded-md p-2 text-xs focus:outline-none focus:border-blue-500  focus:ring-blue-500"
             required
