@@ -1,7 +1,22 @@
+import { signInWithPopup } from "firebase/auth";
 import { useState } from "react";
+import { auth, googleProvider } from "../firebase";
+import toast from "react-hot-toast";
 
 const Login = () => {
   const [togglePassword, setTogglePassword] = useState(false);
+
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      toast.success(`Welcome, ${user.displayName}`);
+      console.log(user); // You can store token, etc.
+    } catch (error) {
+      toast.error("Login failed");
+      console.error(error);
+    }
+  };
 
   return (
     <>
@@ -125,7 +140,9 @@ const Login = () => {
       </div>
 
       <div className="flex flex-col gap-2 ubuntu-font">
-        <button className="flex items-center justify-center gap-2 border-2 border-gray-300 rounded-md p-2 text-xs hover:bg-gray-100 transition duration-200 ease-in-out cursor-pointer">
+        <button
+          onClick={handleGoogleLogin}
+          className="flex items-center justify-center gap-2 border-2 border-gray-300 rounded-md p-2 text-xs hover:bg-gray-100 transition duration-200 ease-in-out cursor-pointer">
           <img
             src="https://img.icons8.com/color/48/000000/google-logo.png"
             alt="Google Logo"
