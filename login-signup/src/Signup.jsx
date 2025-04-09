@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-hot-toast";
-import { signInWithPopup } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../firebase";
 
 const Signup = () => {
   const [togglePassword, setTogglePassword] = useState(false);
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const validatePassword = (password) => {
@@ -19,7 +20,7 @@ const Signup = () => {
     return hasUpperCase && hasLowerCase && hasNumber && isValidLength;
   };
 
-  const handleSubmit = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
 
     if (!validatePassword(password)) {
@@ -27,6 +28,20 @@ const Signup = () => {
         "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, and one number."
       );
       return;
+    }
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+      toast.success(`Welcome, ${user.email}`);
+      console.log("Signed up user:", user);
+    } catch (error) {
+      toast.error("Signup failed: " + error.message);
+      console.error(error);
     }
   };
 
@@ -44,7 +59,7 @@ const Signup = () => {
 
   return (
     <>
-      <form className="flex flex-col ubuntu-font" onSubmit={handleSubmit}>
+      <form className="flex flex-col ubuntu-font" onSubmit={handleSignup}>
         <div className="flex flex-col mb-4 ">
           <label htmlFor="email" className="text-sm font-bold mb-1 ">
             Email Address
@@ -53,6 +68,8 @@ const Signup = () => {
             type="email"
             name="email"
             id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter your email address..."
             className="bg-white border-2 border-gray-300 rounded-md p-2 text-xs focus:outline-none focus:border-blue-500  focus:ring-blue-500"
             autoComplete="email"
@@ -168,6 +185,7 @@ const Signup = () => {
 
       <div className="flex flex-col gap-2 ubuntu-font">
         <button
+          type="submit"
           onClick={handleGoogleLogin}
           className="flex items-center justify-center gap-2 border-2 border-gray-300 rounded-md p-2 text-xs hover:bg-gray-100 transition duration-200 ease-in-out cursor-pointer">
           <img
