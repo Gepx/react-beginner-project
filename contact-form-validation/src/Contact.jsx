@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import emailjs from "@emailjs/browser";
 
 const Contact = () => {
   const [firstName, setFirstName] = useState("");
@@ -6,6 +7,12 @@ const Contact = () => {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+  const form = useRef();
+
+  const serviceID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+  const templateID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+  const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
   const validateForm = () => {
     const newErrors = {};
@@ -33,16 +40,25 @@ const Contact = () => {
   };
 
   const handleSubmit = async (e) => {
+    e.preventDefault();
+
     if (!validateForm()) {
-      e.preventDefault();
-    } else {
-      console.log("Form submitted successfully: ", {
-        firstName,
-        lastName,
-        email,
-        message,
-      });
+      return;
     }
+
+    emailjs.sendForm(serviceID, templateID, form.current, publicKey).then(
+      (result) => {
+        setSuccess(true);
+        setFirstName("");
+        setLastName("");
+        setEmail("");
+        setMessage("");
+        setError({});
+      },
+      (error) => {
+        console.error("EmailJS error:", error.text);
+      }
+    );
   };
 
   return (
@@ -55,18 +71,16 @@ const Contact = () => {
           </p>
         </div>
         <form
-          action="https://formsubmit.co/egipsinargo123@gmail.com"
-          method="POST"
           className="flex flex-col items-start mt-6"
-          onSubmit={handleSubmit}>
+          onSubmit={handleSubmit}
+          ref={form}>
           {/* Hidden input */}
           {/* <input type="hidden" name="_captcha" value="false" /> */}
-          <input
+          {/* <input
             type="hidden"
             name="_subject"
-            value="New Contact Form Submission"
-          />
-
+            value="New Contact Form Submission" */}
+          {/* /> */}
           {/* Content Form */}
           <div className={`flex flex-row items-start gap-4`}>
             <div className="flex flex-col items-start h-[90px]">
@@ -148,7 +162,6 @@ const Contact = () => {
               {error?.message || ""}
             </span>
           </div>
-
           <div className="mx-auto my-1">
             <button
               type="submit"
